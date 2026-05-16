@@ -4,8 +4,8 @@
 OverDrive is a full-stack, high-performance web application designed for IPL fans to engage with live matches through micro-predictions. Built with Next.js, Firebase, and Framer Motion, it offers a premium, real-time experience with dynamic scaling and visual rewards.
 
 ## 🚀 Live Demo
-**[Live Application URL](https://overdrive-ipl-r7qjkldw3a-uc.a.run.app)** 
-*(Note: Deployment in progress)*
+**[Live Application URL](https://overdrive-ipl-155191315903.us-central1.run.app)** 
+
 
 ## ✨ Key Features
 - **Live Dashboard**: Real-time micro-prediction stream powered by Firestore.
