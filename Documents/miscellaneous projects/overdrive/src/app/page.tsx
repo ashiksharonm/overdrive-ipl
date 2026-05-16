@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { LiveDashboard } from "@/components/LiveDashboard";
 import { Onboarding } from "@/components/Onboarding";

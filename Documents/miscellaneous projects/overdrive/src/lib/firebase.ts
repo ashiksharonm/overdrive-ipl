@@ -11,8 +11,23 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if it hasn't been initialized already
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Check if we have the minimum required config to initialize
+const isConfigValid = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "dummy_api_key";
+
+// Initialize Firebase only if it hasn't been initialized already AND we are not in a build environment without keys
+let app;
+if (getApps().length > 0) {
+  app = getApp();
+} else if (isConfigValid) {
+  app = initializeApp(firebaseConfig);
+} else {
+  // Fallback for build time or missing config
+  app = initializeApp({
+    apiKey: "placeholder",
+    authDomain: "placeholder",
+    projectId: "placeholder",
+  });
+}
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
