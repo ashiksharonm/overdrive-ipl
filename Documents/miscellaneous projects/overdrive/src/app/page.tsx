@@ -5,10 +5,10 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { LiveDashboard } from "@/components/LiveDashboard";
 import { Onboarding } from "@/components/Onboarding";
-import { Zap, LogIn } from "lucide-react";
+import { Zap, LogIn, AlertCircle, Copy, Check, ExternalLink, X } from "lucide-react";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup, User } from "firebase/auth";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const TEAMS = [
   { name: "Chennai Super Kings", color: "#eab308", rgb: "234, 179, 8" },
@@ -35,6 +35,9 @@ export default function Home() {
     localStorage.setItem("overdrive-guide-seen", "true");
   };
 
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   // Apply dynamic theme based on favorite team
   useEffect(() => {
     document.documentElement.style.setProperty("--primary", favoriteTeam.color);
@@ -50,9 +53,15 @@ export default function Home() {
 
   const handleSignIn = async () => {
     try {
+      setAuthError(null);
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign-in failed", error);
+      if (error.code === "auth/unauthorized-domain") {
+        setAuthError("unauthorized-domain");
+      } else {
+        setAuthError(error.message || "An unexpected sign-in error occurred.");
+      }
     }
   };
 
@@ -68,6 +77,90 @@ export default function Home() {
     <main className="min-h-screen pb-12 relative overflow-hidden">
       <AnimatePresence>
         {showGuide && <Onboarding onComplete={completeGuide} />}
+      </AnimatePresence>
+
+      {/* Auth Error Modal */}
+      <AnimatePresence>
+        {authError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="max-w-lg w-full bg-[#1e293b]/90 border border-red-500/30 rounded-3xl p-8 relative shadow-2xl glass"
+            >
+              <button 
+                onClick={() => setAuthError(null)} 
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              
+              <div className="flex items-center space-x-3 text-red-400 mb-6">
+                <AlertCircle className="w-8 h-8" />
+                <h3 className="text-2xl font-black uppercase tracking-tight italic">Domain Unauthorized</h3>
+              </div>
+
+              {authError === "unauthorized-domain" ? (
+                <div className="space-y-4">
+                  <p className="text-gray-300 leading-relaxed text-sm">
+                    Firebase Authentication blocks Google Sign-In on new domains until they are explicitly authorized.
+                  </p>
+                  
+                  <div className="bg-black/50 border border-white/5 rounded-2xl p-5 space-y-3">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Step 1: Copy this domain</p>
+                    <div className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-xl border border-white/10">
+                      <code className="text-xs text-blue-400 font-mono select-all">
+                        overdrive-ipl-155191315903.us-central1.run.app
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText("overdrive-ipl-155191315903.us-central1.run.app");
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors flex items-center space-x-1 text-xs shrink-0"
+                      >
+                        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        <span>{copied ? "Copied" : "Copy"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/50 border border-white/5 rounded-2xl p-5 space-y-3">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Step 2: Add in Firebase</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Go to <span className="text-white font-semibold">Firebase Console</span> &gt; <span className="text-white font-semibold">Authentication</span> &gt; <span className="text-white font-semibold">Settings</span> &gt; <span className="text-white font-semibold">Authorized domains</span> tab, and add this domain to the list.
+                    </p>
+                    <a
+                      href="https://console.firebase.google.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-2 text-xs font-bold text-[var(--primary)] hover:underline mt-1"
+                    >
+                      <span>Open Firebase Console</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-300 text-sm">{authError}</p>
+              )}
+
+              <button
+                onClick={() => setAuthError(null)}
+                className="mt-6 w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 rounded-2xl border border-white/10 transition-colors"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Navbar */}
