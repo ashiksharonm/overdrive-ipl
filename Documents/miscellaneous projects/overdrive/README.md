@@ -16,7 +16,7 @@ OverDrive is a full-stack, high-performance web application designed for IPL fan
 - **Premium UI**: Built with Tailwind CSS and Framer Motion for glassmorphism effects and smooth transitions.
 
 ## 🛠️ Tech Stack
-- **Frontend**: Next.js 15 (App Router), Tailwind CSS, Framer Motion
+- **Frontend**: Next.js 16 (App Router), Tailwind CSS, Framer Motion
 - **Backend/Database**: Firebase Firestore (Real-time), Firebase Auth
 - **Deployment**: Google Cloud Run (Dockerized)
 
